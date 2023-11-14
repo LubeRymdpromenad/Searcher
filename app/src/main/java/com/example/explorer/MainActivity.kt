@@ -13,9 +13,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             ExplorerTheme {
-                ExplorerApp(
-                    isCompact = true // TODO use windowSizeClass
-                )
+                ExplorerApp()
             }
         }
     }

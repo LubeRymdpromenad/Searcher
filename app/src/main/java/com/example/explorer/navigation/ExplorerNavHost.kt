@@ -12,7 +12,6 @@ import com.example.explorer.feature.search.navigation.searchScreen
 
 @Composable
 fun ExplorerNavHost(
-    isCompact: Boolean,
     navController: NavHostController,
     modifier: Modifier = Modifier
 ) {

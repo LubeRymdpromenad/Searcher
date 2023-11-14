@@ -15,9 +15,7 @@ import com.example.explorer.navigation.ExplorerNavHost
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ExplorerApp(
-    isCompact: Boolean
-) {
+fun ExplorerApp() {
     val navController = rememberNavController()
 
     Scaffold(
@@ -33,7 +31,6 @@ fun ExplorerApp(
         }
     ) { innerPadding ->
         ExplorerNavHost(
-            isCompact = isCompact,
             navController = navController,
             modifier = Modifier.padding(innerPadding)
         )
