@@ -55,7 +55,7 @@ internal fun SearchRoute(
     viewModel: SearchViewModel = hiltViewModel()
 ) {
     SearchScreen(
-        searchData = viewModel.getSearchData(),
+        searchData = viewModel.searchState,
         onSearchClick = viewModel::makeSearch,
         onItemClick = onItemClick
     )

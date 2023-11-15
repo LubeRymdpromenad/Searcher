@@ -1,35 +1,38 @@
 package com.example.explorer.feature.search.viewmodel
 
 import androidx.lifecycle.ViewModel
-import androidx.paging.Pager
-import androidx.paging.PagingConfig
+import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
-import com.example.explorer.core.data.PER_PAGE
-import com.example.explorer.core.data.SearchDataSource
+import androidx.paging.cachedIn
+import com.example.explorer.core.data.GetSearchUseCase
 import com.example.explorer.core.data.model.SearchItemsData
-import com.example.explorer.core.data.repository.SearchRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 
 @HiltViewModel
 class SearchViewModel @Inject constructor(
-    private val searchRepository: SearchRepository
+    private val getSearchUseCase: GetSearchUseCase
 ) : ViewModel() {
-    private var searchDataSource: SearchDataSource = SearchDataSource(
-        query = "",
-        searchRepository = searchRepository
-    )
 
-    fun makeSearch(query: String) {
-        searchDataSource.invalidate()
-        searchDataSource = SearchDataSource(
-            query = query,
-            searchRepository = searchRepository
-        )
+    private val _searchState: MutableStateFlow<PagingData<SearchItemsData.SearchItemData>> = MutableStateFlow(value = PagingData.empty())
+    val searchState: MutableStateFlow<PagingData<SearchItemsData.SearchItemData>> get() = _searchState
+
+    private suspend fun getSearch(query: String) {
+        getSearchUseCase.execute(query)
+            .distinctUntilChanged()
+            .cachedIn(viewModelScope)
+            .collect {
+                _searchState.value = it
+            }
     }
 
-    fun getSearchData(): Flow<PagingData<SearchItemsData.SearchItemData>> =
-        Pager(PagingConfig(PER_PAGE)) { searchDataSource }.flow
+    fun makeSearch(query: String) {
+        viewModelScope.launch {
+            getSearch(query)
+        }
+    }
 }

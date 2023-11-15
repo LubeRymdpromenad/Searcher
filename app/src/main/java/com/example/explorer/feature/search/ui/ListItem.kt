@@ -73,7 +73,7 @@ internal fun ListItem(
 
 @Preview(showBackground = true)
 @Composable
-private fun Preview_PlantListItem() {
+private fun Preview_SearchListItem() {
     ExplorerTheme {
         ListItem(listItemSample.first()) {}
     }
