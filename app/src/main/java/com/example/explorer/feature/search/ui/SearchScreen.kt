@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
@@ -18,6 +19,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -42,6 +44,7 @@ import com.example.explorer.feature.search.viewmodel.SearchViewModel
 import com.example.explorer.ui.theme.ExplorerTheme
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.launch
 
 @VisibleForTesting
 const val SEARCH_TEXT_FIELD = "SEARCH_TEXT_FIELD"
@@ -75,12 +78,18 @@ internal fun SearchScreen(
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
 
+    val listState = rememberLazyListState()
+    val scope = rememberCoroutineScope()
+
     val onSearch: () -> Unit = {
         keyboardController?.hide()
         focusManager.clearFocus()
         if (text.isNotEmpty()) {
             emptyState = false
             onSearchClick.invoke(text.trim())
+            scope.launch {
+                listState.animateScrollToItem(0)
+            }
         }
     }
 
@@ -98,6 +107,7 @@ internal fun SearchScreen(
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
         ) {
+
             OutlinedTextField(
                 value = text,
                 onValueChange = {
@@ -137,6 +147,7 @@ internal fun SearchScreen(
             val lazyItems = searchData.collectAsLazyPagingItems()
 
             LazyColumn(
+                state = listState,
                 content = {
                     items(lazyItems.itemCount) { index ->
                         lazyItems[index]?.let {
@@ -151,12 +162,15 @@ internal fun SearchScreen(
                             loadState.refresh is LoadState.Loading -> {
                                 item { LoadingItem() }
                             }
+
                             loadState.append is LoadState.Loading -> {
                                 item { LoadingItem() }
                             }
+
                             loadState.refresh is LoadState.Error -> {
                                 item { ErrorItem() }
                             }
+
                             loadState.append is LoadState.Error -> {
                                 item { ErrorItem() }
                             }
